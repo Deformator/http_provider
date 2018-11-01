@@ -10,20 +10,20 @@ import { of } from 'rxjs/observable/of';
   selector: 'page-home',
   templateUrl: 'home.html'
 })
-export class HomePage implements OnInit{
+export class HomePage implements OnInit {
 
   homeMenu$: Observable<Array<any>>
 
   constructor(public navCtrl: NavController, private backend: BackendProvider, private global: GlobalProvider, private toastCtrl: ToastController) {
-    
+
   }
 
-  ngOnInit(){
+  ngOnInit() {
     this.homeMenu$ = this.backend.getHomeMenu()
-    .catch(err => {
-      alert(JSON.stringify(err.message))
-      return [];
-    })
+      .catch(err => {
+        alert(err)
+        return [];
+      })
   }
 
 }
