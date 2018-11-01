@@ -26,15 +26,28 @@ export class BackendProvider {
 
   }
 
+ async setTokenToHeaders() {
+    let token = await this.storage.get('token');
+    console.log(token)
+      if (token) {
+        // console.log(token)
+        this.token = token;
+        return true;
+      } else {
+        return false;
+      }
+
+  }
+
   // base shape for HTTP request 
   request(endpoint: string, requestType: string, fresh: boolean, data?: any) {
 
-    //init headers for HTTP request
-    let httpOptions = {
+   let httpOptions = {
       headers: new HttpHeaders({
         'Token': this.token
       })
     }
+    // this.httpOptions.headers = this.httpOptions.headers.set('Token', token);
 
     //observable subject which is observable and observer in the same time
     const subject = new Subject();
@@ -113,13 +126,13 @@ export class BackendProvider {
           //network is unavailable
           else {
             //return data if it's presents in cache
-            if(cachedResponse){
+            if (cachedResponse) {
               subject.next(
                 {
                   dataType: 'cache',
                   data: JSON.parse(cachedResponse.value)
                 }
-              ) 
+              )
             }
             //emit an error
             subject.error('Network is unavailable');
@@ -148,7 +161,7 @@ export class BackendProvider {
 
 
   getHomeMenu(fresh = true): Observable<Array<any>> {
-    return this.getRequest(`home-menu3`, fresh)
+    return this.getRequest(`home-menu`, fresh)
       .pipe(
         map((res: any) => res = res.data.menu)
       )

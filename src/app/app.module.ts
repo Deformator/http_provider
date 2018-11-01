@@ -12,6 +12,9 @@ import { CacheModule } from "ionic-cache";
 import { Network } from '@ionic-native/network';
 import { GlobalProvider } from '../providers/global';
 import { UtilsProvider } from '../providers/utils'
+import { AuthProvider } from '../providers/auth';
+import { LoginPageModule } from '../pages/login/login.module';
+import { LoginPage } from '../pages/login/login';
 
 
 @NgModule({
@@ -24,12 +27,14 @@ import { UtilsProvider } from '../providers/utils'
     IonicModule.forRoot(MyApp),
     CacheModule.forRoot(),
     HttpClientModule,
+    LoginPageModule
    
   ],
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    HomePage
+    HomePage,
+    LoginPage
   ],
   providers: [
     StatusBar,
@@ -38,7 +43,8 @@ import { UtilsProvider } from '../providers/utils'
     BackendProvider,
     Network,
     GlobalProvider,
-    UtilsProvider
+    UtilsProvider,
+    AuthProvider
     
   ]
 })

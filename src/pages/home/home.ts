@@ -21,6 +21,12 @@ export class HomePage implements OnInit {
 
   }
 
+  ionViewCanEnter(){
+   return this.backend.setTokenToHeaders().then((tokenWasSet)=> {
+      return tokenWasSet;
+    })
+  }
+
   ngOnInit() {
     this.homeMenu$ = this.backend.getHomeMenu()
       .catch(err => {
