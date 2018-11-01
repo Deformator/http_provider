@@ -22,7 +22,7 @@ export class BackendProvider {
 
   }
 
-  request(endpoint: string, requestType: string, fresh = false, data?: any){
+  request(endpoint: string, requestType: string, fresh: boolean, data?: any) {
 
     let httpOptions = {
       headers: new HttpHeaders({
@@ -33,154 +33,17 @@ export class BackendProvider {
     const subject = new Subject();
     const requestedUrl = `${this.protocol}${this.domainName}${this.apiUrl}${endpoint}`;
     let request$;
-    if(requestType === 'GET'){
-      request$ = this.http.get(requestedUrl,httpOptions);
-    }else if(requestType === 'POST'){
+    if (requestType === 'GET') {
+      request$ = this.http.get(requestedUrl, httpOptions);
+    } else if (requestType === 'POST') {
+      let body: FormData = new FormData();
+      Object.keys(data).forEach(key => {
+        body.append(key, data[key]);
+      });
       request$ = this.http.post(requestedUrl, body, httpOptions);
     }
-    
-    
-
-    this.storage.get(requestedUrl)
-    .then(cachedResponse => {
-      if (cachedResponse && !fresh) {
-        subject.next(
-          {
-            dataType: 'cache',
-            data: JSON.parse(cachedResponse.value)
-          }
-        );
-        subject.complete();
-      } else {
-        if (this.global.networkAvailable) {
-          this.cache.loadFromDelayedObservable(requestedUrl, request$, 'POST', this.ttl, 'all')
-            .pipe(
-              last()
-            )
-            .subscribe((res: any) => {
-              if (res.status === `SUCCESS`) {
-                subject.next(
-                  {
-                    dataType: 'live',
-                    data: res
-                  }
-                );
-                // subject.complete();
-              } else {
-                this.cache.removeItem(requestedUrl);
-
-                console.log(`Server requested with a not success status: ${res.status}`); //adjust a handler
-                subject.error(`Server requested with a not success status: ${res.status}`);
-              }
-
-            },
-              (error: Response) => {
-                console.log(`Request to the server ${requestedUrl} returns an error: ${error.status}`);
-                //  throw error;
-                subject.error(`Request to the server ${requestedUrl} returns an error: ${error.status}`)
-              })
-        } else {
-          subject.error('Network is unavailable');
-        }
-
-      }
-    })
-    .catch(err => {
-      subject.error(`Can't reach the storage. Error: ${err}`);
-    })
-
-  return subject;
-  }
-
-  postRequest(endpoint: string, fresh = false, data?: any) {
-
-    // let httpOptions = {
-    //   headers: new HttpHeaders({
-    //     'Token': this.token
-    //   })
-    // }
-
-    // let body: FormData = new FormData();
-
-    // const subject = new Subject();
-    // const requestedUrl = `${this.protocol}${this.domainName}${this.apiUrl}${endpoint}`;
-    // const request$ = this.http.post(requestedUrl, body, httpOptions);
-
-    // Object.keys(data).forEach(key => {
-    //   body.append(key, data[key]);
-    // });
 
 
-    
-
-    // this.request(endpoint, 'POST', fresh = false, data)
-
-    // this.storage.get(requestedUrl)
-    //   .then(cachedResponse => {
-    //     if (cachedResponse && !fresh) {
-    //       subject.next(
-    //         {
-    //           dataType: 'cache',
-    //           data: JSON.parse(cachedResponse.value)
-    //         }
-    //       );
-    //       subject.complete();
-    //     } else {
-    //       if (this.global.networkAvailable) {
-    //         this.cache.loadFromDelayedObservable(requestedUrl, request$, 'POST', this.ttl, 'all')
-    //           .pipe(
-    //             last()
-    //           )
-    //           .subscribe((res: any) => {
-    //             if (res.status === `SUCCESS`) {
-    //               subject.next(
-    //                 {
-    //                   dataType: 'live',
-    //                   data: res
-    //                 }
-    //               );
-    //               // subject.complete();
-    //             } else {
-    //               this.cache.removeItem(requestedUrl);
-
-    //               console.log(`Server requested with a not success status: ${res.status}`); //adjust a handler
-    //               subject.error(`Server requested with a not success status: ${res.status}`);
-    //             }
-
-    //           },
-    //             (error: Response) => {
-    //               console.log(`Request to the server ${requestedUrl} returns an error: ${error.status}`);
-    //               //  throw error;
-    //               subject.error(`Request to the server ${requestedUrl} returns an error: ${error.status}`)
-    //             })
-    //       } else {
-    //         subject.error('Network is unavailable');
-    //       }
-
-    //     }
-    //   })
-    //   .catch(err => {
-    //     subject.error(`Can't reach the storage. Error: ${err}`);
-    //   })
-
-    // return subject;
-
-  }
-
-
-
-  getRequest(endpoint: string, fresh = false) {
-
-    let httpOptions = {
-      headers: new HttpHeaders({
-        'Token': this.token
-      })
-    }
-    const subject = new Subject();
-
-    const requestedUrl = `${this.protocol}${this.domainName}${this.apiUrl}${endpoint}`;
-
-    const request$ = this.http.get(requestedUrl, httpOptions);
 
     this.storage.get(requestedUrl)
       .then(cachedResponse => {
@@ -194,12 +57,11 @@ export class BackendProvider {
           subject.complete();
         } else {
           if (this.global.networkAvailable) {
-            this.cache.loadFromDelayedObservable(requestedUrl, request$, 'GET', this.ttl, 'all')
+            this.cache.loadFromDelayedObservable(requestedUrl, request$, 'POST', this.ttl, 'all')
               .pipe(
                 last()
               )
               .subscribe((res: any) => {
-                console.log(res)
                 if (res.status === `SUCCESS`) {
                   subject.next(
                     {
@@ -207,9 +69,10 @@ export class BackendProvider {
                       data: res
                     }
                   );
-                  subject.complete();
+                  // subject.complete();
                 } else {
                   this.cache.removeItem(requestedUrl);
+
                   console.log(`Server requested with a not success status: ${res.status}`); //adjust a handler
                   subject.error(`Server requested with a not success status: ${res.status}`);
                 }
@@ -217,6 +80,7 @@ export class BackendProvider {
               },
                 (error: Response) => {
                   console.log(`Request to the server ${requestedUrl} returns an error: ${error.status}`);
+                  //  throw error;
                   subject.error(`Request to the server ${requestedUrl} returns an error: ${error.status}`)
                 })
           } else {
@@ -232,10 +96,20 @@ export class BackendProvider {
     return subject;
   }
 
+  postRequest(endpoint: string, fresh = false, data) {
+    return this.request(endpoint, 'POST', fresh, data);
+  }
+
+
+
+  getRequest(endpoint: string, fresh = false) {
+    return this.request(endpoint, 'GET', fresh);
+  }
+
 
 
   getHomeMenu(fresh = false): Observable<Array<any>> {
-    return this.getRequest(`home-menu1`, fresh)
+    return this.getRequest(`home-menu`, fresh)
       .pipe(
         map((res: any) => res = res.data.menu)
       )

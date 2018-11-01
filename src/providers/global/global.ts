@@ -1,16 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-// import { Network } from '@ionic-native/network';
 
 @Injectable()
 export class GlobalProvider {
 
   networkAvailable = navigator.onLine;
 
-  constructor(
-    // private network: Network
-    ) {
-
+  constructor() {
   }
 
   setupEvents(){
