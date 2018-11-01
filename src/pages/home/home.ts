@@ -3,6 +3,8 @@ import { NavController, ToastController } from 'ionic-angular';
 import { BackendProvider } from '../../providers/backend/backend';
 import { GlobalProvider } from '../../providers/global/global';
 import { Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs/observable/of';
 
 @Component({
   selector: 'page-home',
@@ -11,18 +13,17 @@ import { Observable } from 'rxjs';
 export class HomePage implements OnInit{
 
   homeMenu$: Observable<Array<any>>
-  // toast;
 
   constructor(public navCtrl: NavController, private backend: BackendProvider, private global: GlobalProvider, private toastCtrl: ToastController) {
     
   }
 
   ngOnInit(){
-    // this.toast = this.toastCtrl.create({
-    //   message: `You are offline`
-    // });
-    
-    this.homeMenu$ = this.backend.getHomeMenu();
+    this.homeMenu$ = this.backend.getHomeMenu()
+    .catch(err => {
+      alert(JSON.stringify(err.message))
+      return [];
+    })
   }
 
 }

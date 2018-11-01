@@ -21,8 +21,7 @@ export class BackendProvider {
 
   }
 
-  getRequest(endpoint: string, fresh = false) {
-    console.log(`network connection ${this.global.networkAvailable}`);
+  postRequest(endpoint: string, fresh = false) {
     const subject = new Subject();
 
     const requestedUrl = `${this.protocol}${this.domainName}${this.apiUrl}${endpoint}`;
@@ -77,11 +76,74 @@ export class BackendProvider {
 
 
 
-  getHomeMenu(fresh = false) : Observable<Array<any>> {
-    return this.getRequest(`home-menu`, fresh)
+  getRequest(endpoint: string, fresh = false) {
+    const subject = new Subject();
+
+    const requestedUrl = `${this.protocol}${this.domainName}${this.apiUrl}${endpoint}`;
+    // const requestBody = 
+    const request$ = this.http.get(requestedUrl);
+
+    this.storage.get(requestedUrl)
+      .then(cachedResponse => {
+        if (cachedResponse && !fresh) {
+          subject.next(
+            {
+              dataType: 'cache',
+              data: JSON.parse(cachedResponse.value)
+            }
+          );
+          subject.complete();
+        } else {
+          if (this.global.networkAvailable) {
+            this.cache.loadFromDelayedObservable(requestedUrl, request$, 'GET', this.ttl, 'all')
+              .pipe(
+                last()
+              )
+              .subscribe((res: any) => {
+                if (res.status === `SUCCESS`) {
+                  subject.next(
+                    {
+                      dataType: 'live',
+                      data: res
+                    }
+                  );
+                  // subject.complete();
+                } else {
+                  this.cache.removeItem(requestedUrl);
+
+                  console.log(`Server requested with a not success status: ${res.status}`); //adjust a handler
+                  subject.error('error');
+                }
+
+              },
+                (error: Response) => {
+                  console.log(`Request to the server returns an error: ${error.status}`);
+                  //  throw error;
+                  subject.error(error)
+                })
+          } else {
+            subject.error('Network is unavailable');
+          }
+
+        }
+      })
+      .catch(err => {
+        subject.error(err);
+      })
+
+    return subject;
+  }
+
+
+
+  getHomeMenu(fresh = false): Observable<Array<any>> {
+    return this.getRequest(`home-menu1`, fresh)
       .pipe(
-        map((res: any) =>  res = res.data.menu
-        )
+        map((res: any) => res = res.data.menu),
+        // catchError(err => {
+        //   console.log('home-menu error')
+        //   throw err
+        // })
       )
   }
 
