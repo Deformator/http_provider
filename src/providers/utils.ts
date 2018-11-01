@@ -7,11 +7,12 @@ export class UtilsProvider {
     constructor(private toastCtrl: ToastController) {
     }
 
-    presentToastError(error: string){
+    presentToastError(error: string, position: string = 'bottom') {
         const toast = this.toastCtrl.create({
-          message: error,
-          duration: 3000
+            message: error,
+            duration: 3000,
+            position: position
         });
         toast.present();
-      }
+    }
 }

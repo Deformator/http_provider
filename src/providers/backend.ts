@@ -23,14 +23,12 @@ export class BackendProvider {
     private storage: Storage,
     private global: GlobalProvider
   ) {
-
+    
   }
 
  async setTokenToHeaders() {
     let token = await this.storage.get('token');
-    console.log(token)
       if (token) {
-        // console.log(token)
         this.token = token;
         return true;
       } else {
@@ -47,7 +45,6 @@ export class BackendProvider {
         'Token': this.token
       })
     }
-    // this.httpOptions.headers = this.httpOptions.headers.set('Token', token);
 
     //observable subject which is observable and observer in the same time
     const subject = new Subject();
