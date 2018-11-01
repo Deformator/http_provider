@@ -6,11 +6,12 @@ import { StatusBar } from '@ionic-native/status-bar';
 
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
-import { BackendProvider } from '../providers/backend/backend';
+import { BackendProvider } from '../providers/backend';
 import { HttpClientModule } from '@angular/common/http';
 import { CacheModule } from "ionic-cache";
 import { Network } from '@ionic-native/network';
-import { GlobalProvider } from '../providers/global/global';
+import { GlobalProvider } from '../providers/global';
+import { UtilsProvider } from '../providers/utils'
 
 
 @NgModule({
@@ -36,7 +37,9 @@ import { GlobalProvider } from '../providers/global/global';
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     BackendProvider,
     Network,
-    GlobalProvider
+    GlobalProvider,
+    UtilsProvider
+    
   ]
 })
 export class AppModule {}

@@ -4,7 +4,7 @@ import { CacheService } from "ionic-cache";
 import { Observable, Subject } from 'rxjs';
 import { last, map } from 'rxjs/operators';
 import { Storage } from '@ionic/storage';
-import { GlobalProvider } from '../global/global';
+import { GlobalProvider } from './global';
 
 
 
@@ -98,7 +98,7 @@ export class BackendProvider {
                   //remove cached object from storage
                   this.cache.removeItem(requestedUrl);
                   console.log(`Server requested with a not success status: ${res.status}`);
-                  //emit an error
+                  //emit an error         
                   subject.error(`Server requested with a not success status: ${res.status}`);
                 }
 
@@ -112,6 +112,15 @@ export class BackendProvider {
           }
           //network is unavailable
           else {
+            //return data if it's presents in cache
+            if(cachedResponse){
+              subject.next(
+                {
+                  dataType: 'cache',
+                  data: JSON.parse(cachedResponse.value)
+                }
+              ) 
+            }
             //emit an error
             subject.error('Network is unavailable');
           }
@@ -138,8 +147,8 @@ export class BackendProvider {
   }
 
 
-  getHomeMenu(fresh = false): Observable<Array<any>> {
-    return this.getRequest(`home-menu`, fresh)
+  getHomeMenu(fresh = true): Observable<Array<any>> {
+    return this.getRequest(`home-menu3`, fresh)
       .pipe(
         map((res: any) => res = res.data.menu)
       )
