@@ -7,6 +7,14 @@
 </ion-header>
 
 <ion-content padding>
+    <ion-refresher (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content
+        pullingIcon="arrow-dropdown"
+        pullingText="Pull to refresh"> 
+        </ion-refresher-content>
+      </ion-refresher>
+    
+    <ion-spinner name="bubbles" *ngIf="showSpinner"></ion-spinner>
   <ion-list>
     <ion-item *ngFor='let item of homeMenu$ | async'>
       {{item.title}}
